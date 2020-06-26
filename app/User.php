@@ -10,6 +10,43 @@ class User extends Authenticatable
 {
     use Notifiable;
 
+    //metodo que relaciona a los modelos user y role
+    public function roles(){
+      return $this->belongsToMany('App\Role');
+    }
+
+    //valida si el usuario tiene un rol
+    public function hasRole($role){
+      if ($this->roles()->where('name', $role)->first()){
+        return true;
+      }
+      return false;
+    }
+
+    //valida si el usuario tiene uno o varios roles
+    public function hasAnyRole($roles){
+        if(is_array($roles)){
+          foreach($roles as $role){
+            if($this->hasRole($role)){
+              return true;
+            }
+          }
+        }else {
+          if($this->hasRole($roles)){
+            return true;
+          }
+        }
+      }
+
+    //
+    public function authorizeRoles($roles){
+      if($this->hasAnyRole($roles)){
+        return true;
+      }
+      abort(401, 'No estas autorizado para esta accion');
+      }
+
+
     /**
      * The attributes that are mass assignable.
      *
